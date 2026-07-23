@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Grain Quiz</title>
 <style>
   /* Grain brand typeface — FunkisA (embedded, works offline) */
@@ -44,7 +44,7 @@
   }
   .wrap{max-width:680px;margin:0 auto;padding:20px 16px 140px}
 
-  .topbar{max-width:680px;margin:0 auto;padding:20px 16px 4px;text-align:center}
+  .topbar{max-width:680px;margin:0 auto;padding:48px 16px 4px;text-align:center}
   .logo{margin-bottom:12px;line-height:0;color:var(--ink)}
   .logo img,.logo svg{height:48px;width:auto;display:inline-block}
   .topbar h1{margin:8px 0 2px;font-size:26px;font-weight:700;line-height:1.15;text-wrap:balance}
@@ -130,19 +130,20 @@
   .review{margin-top:20px;text-align:left}
   .review h3{text-align:center;font-size:16px;font-weight:700;margin:0 0 4px}
   .review .rsub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 16px}
-  .rev-item{border-top:1px solid var(--line);padding:16px 0 4px}
+  .rev-item{border-top:1px solid var(--line);padding:22px 0 8px}
   .rev-item:first-of-type{border-top:none}
-  .rev-q{font-weight:700;font-size:15px;margin:0 0 10px}
+  .rev-q{font-weight:700;font-size:16px;margin:0 0 14px;line-height:1.35}
   .rev-q .num{color:var(--muted);font-weight:700;margin-right:6px}
-  .rev-opts{display:flex;flex-direction:column;gap:6px}
-  .rev-opt{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line-strong);border-radius:var(--r-control);
-           padding:9px 12px;font-size:14px;background:#fff}
-  .rev-opt .mk{flex:none;width:20px;text-align:center;font-weight:700}
+  .rev-opts{display:flex;flex-direction:column;gap:10px}
+  .rev-opt{display:flex;align-items:flex-start;gap:10px;border:1.5px solid var(--line-strong);border-radius:var(--r-control);
+           padding:13px 15px;font-size:15px;line-height:1.4;background:#fff}
+  .rev-opt .mk{flex:none;width:18px;text-align:center;font-weight:700}
+  .rev-opt .otxt{flex:1;min-width:0}
   .rev-opt.correct{border-color:var(--ok);background:rgba(63,125,84,.10)}
   .rev-opt.correct .mk{color:var(--ok)}
   .rev-opt.wrong{border-color:var(--red);background:rgba(192,57,43,.08)}
   .rev-opt.wrong .mk{color:var(--red)}
-  .rev-opt .tag{margin-left:auto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .rev-opt .tag{flex:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;margin-top:2px}
   .rev-opt.correct .tag{color:var(--ok)}
   .rev-opt.wrong .tag{color:var(--red)}
 
@@ -150,6 +151,13 @@
          padding:12px 16px;border-radius:var(--r-control);font-size:14px;z-index:50;box-shadow:var(--shadow);display:none;max-width:92%}
   .hidden{display:none}
   .foot-note{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+  /* mobile: reclaim width so cards and the answer review don't feel squeezed */
+  @media (max-width:560px){
+    .topbar{padding-top:calc(40px + env(safe-area-inset-top, 0px))}
+    .wrap{padding-left:12px;padding-right:12px}
+    .card{padding:22px 18px 24px}
+    .q-text{font-size:19px}
+  }
   a.lb-link{color:var(--ink);font-weight:700}
 </style>
 </head>
@@ -282,7 +290,7 @@ function renderMeta(){
   const answered = answers.filter(a=>a!==null).length;
   $('meta').innerHTML =
     '<span class="chip">'+Math.min(qi+1,TOTAL)+' / '+TOTAL+'</span>'+
-    '<span class="chip timer">⏱ <b>'+fmt(elapsedMs())+'</b></span>';
+    '<span class="chip timer"><b>'+fmt(elapsedMs())+'</b></span>';
   $('progressBar').style.width = (answered/TOTAL*100)+'%';
 }
 
@@ -357,7 +365,7 @@ function finish(){
   $('scoreOf').textContent = 'of '+TOTAL+' correct';
   $('statScore').textContent = correct+'/'+TOTAL;
   $('statTime').textContent = fmt(elapsedMs());
-  $('resultHeading').textContent = correct===TOTAL ? ('Perfect score, '+name+'! 🏆')
+  $('resultHeading').textContent = correct===TOTAL ? ('Perfect score, '+name+'!')
                                   : correct>=Math.ceil(TOTAL*0.7) ? ('Sharp palate, '+name+'!')
                                   : ('Thanks, '+name+'!');
   $('resultSub').textContent = 'You got '+correct+' of '+TOTAL+' right in '+fmt(elapsedMs())+'.';
@@ -383,7 +391,7 @@ function renderReview(){
       let cls='', mk=keys[idx], tag='';
       if(idx===item.answer){ cls=' correct'; mk='✓'; tag='<span class="tag">Correct'+(gotIt?' · your pick':'')+'</span>'; }
       else if(idx===chosen){ cls=' wrong'; mk='✗'; tag='<span class="tag">Your pick</span>'; }
-      html+='<div class="rev-opt'+cls+'"><span class="mk">'+mk+'</span><span>'+esc(opt)+'</span>'+tag+'</div>';
+      html+='<div class="rev-opt'+cls+'"><span class="mk">'+mk+'</span><span class="otxt">'+esc(opt)+'</span>'+tag+'</div>';
     });
     html+='</div></div>';
   });
