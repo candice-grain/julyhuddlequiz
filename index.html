@@ -170,7 +170,7 @@
   <section id="screen-name">
     <div class="card">
       <div class="badge">Grain Quiz</div>
-      <h2 id="welcomeHeading">10 questions</h2>
+      <h2 id="welcomeHeading">Have you been paying attention?</h2>
       <p class="sub" id="introSub" style="margin-bottom:16px">See how well you really know Grain.</p>
       <div class="q" id="q-name">
         <label class="field-label" for="name">First, what’s your name? <span class="req">*</span></label>
@@ -241,7 +241,7 @@ const QUESTIONS = [
     options:["Singapore Chicken Satay","Osaka-Style Takoyaki","Truffle Four-Cheese Mac","Indonesian Spiced Potato Cake"], answer:3 },
   { q:"What are the dimensions of a chafing dish with insert? (L × H × W, in cm)",
     options:["L57 × H23 × W37","L54 × H23 × W34","L57 × H23 × W34","L54 × H23 × W37"], answer:0 },
-  { q:"What did June revenue close at?",
+  { q:"What did June sales close at?",
     options:["~$1.7M","~$1.96M","~$2.2M","~$2.44M"], answer:1 },
   { q:"They all sound plant-based, but only one is actually vegan. Which?",
     options:["Truffle Four-Cheese Mac","Actually Plant-Based Chicken Gyoza","Plant-Based Beef Lasagna","Indonesian Spiced Potato Cake"], answer:1 },
@@ -430,7 +430,6 @@ if(!QUESTIONS.length){
   document.querySelector('.wrap').innerHTML='<div class="card"><h2>No questions configured</h2><p class="sub">Add questions to the QUESTIONS array at the top of the script.</p></div>';
 }else{
   QUESTIONS.forEach(shuffleOptions);
-  $('welcomeHeading').textContent = TOTAL+' questions';
   $('introSub').innerHTML = 'See how well you really know Grain.<br><br>Get them right, get them fast, and check where you stand on the leaderboard at the end.';
   $('name').addEventListener('keydown', e=>{ if(e.key==='Enter') onStart(); });
   document.addEventListener('keydown', e=>{
