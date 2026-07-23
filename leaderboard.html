@@ -41,9 +41,16 @@
   .chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:middle}
   .chip .dot.stale{background:var(--muted)}
 
+  /* tabs */
+  .tabs{display:flex;gap:8px;justify-content:center;margin-top:18px}
+  .tab{font-family:inherit;font-size:14px;font-weight:700;color:var(--muted);background:#fff;border:1px solid var(--line-strong);
+       border-radius:var(--r-pill);padding:9px 16px;cursor:pointer}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tab:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(254,204,7,.5)}
+
   /* ---------- podium (F1 pedestal, no photos) ---------- */
   .podium-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow);
-               padding:26px 14px 0;margin-top:22px;overflow:hidden}
+               padding:26px 14px 0;margin-top:20px;overflow:hidden}
   .podium{display:flex;justify-content:center;align-items:flex-end;gap:10px}
   .pod{flex:1 1 0;max-width:180px;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center}
   .pod .crown{font-size:26px;line-height:1;margin-bottom:4px;height:28px}
@@ -62,17 +69,15 @@
   .pod.p2 .pscore{font-size:20px;color:var(--silver-ink)} .pod.p3 .pscore{font-size:20px;color:var(--bronze-ink)}
   @media (prefers-reduced-motion:no-preference){
     @keyframes riseUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-    .pod{animation:riseUp .36s ease both}
-    .pod.p1{animation-delay:.05s}
+    .pod{animation:riseUp .36s ease both} .pod.p1{animation-delay:.05s}
   }
 
-  /* ---------- full standings list ---------- */
+  /* ---------- standings list (rank 4+) ---------- */
   .list-label{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center;margin:24px 4px 2px}
   .board{margin-top:10px;display:flex;flex-direction:column;gap:8px}
   .row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
        border-radius:var(--r-card);padding:13px 18px;box-shadow:var(--shadow)}
   .row .rnum{flex:none;width:30px;text-align:center;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;font-size:17px}
-  .row .rnum.t1{color:var(--gold-ink)} .row .rnum.t2{color:var(--silver-ink)} .row .rnum.t3{color:var(--bronze-ink)}
   .row .who{min-width:0;flex:1}
   .row .who .nm{font-weight:700;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .row .who .sub{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -81,6 +86,26 @@
     @keyframes rowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
     .row{animation:rowIn .26s ease both}
   }
+
+  /* ---------- question review (most missed) ---------- */
+  .review{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow);padding:18px 20px}
+  .qcard.hardest{border-color:var(--red)}
+  .qtop{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .qtag{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+  .pill-hard{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:rgba(192,57,43,.12);color:var(--red);border-radius:var(--r-pill);padding:3px 9px}
+  .qq{font-weight:700;font-size:17px;margin:0 0 14px;line-height:1.3;text-wrap:balance}
+  .obar{position:relative;border:1.5px solid var(--line-strong);border-radius:var(--r-control);padding:11px 14px;margin-bottom:8px;overflow:hidden;display:flex;align-items:center;gap:10px}
+  .obar .ofill{position:absolute;left:0;top:0;bottom:0;background:var(--accent-tint);z-index:0;transition:width .4s ease}
+  .obar.correct{border-color:var(--ok)}
+  .obar.correct .ofill{background:rgba(63,125,84,.16)}
+  .obar .olabel{position:relative;z-index:1;font-size:14px;font-weight:600;flex:1;min-width:0}
+  .obar.correct .olabel{color:var(--ok);font-weight:700}
+  .obar .ocount{position:relative;z-index:1;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+  .qn{margin:8px 0 0;font-size:13px;color:var(--muted)}
+  .qn b{color:var(--ink)}
+  .qwhy{margin:12px 0 0;font-size:13.5px;color:var(--ink);background:var(--accent-tint);border-radius:12px;padding:11px 13px;line-height:1.5}
+  .qwhy b{font-weight:700}
 
   /* ---------- states ---------- */
   .state{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow);
@@ -111,10 +136,21 @@
     </div>
   </header>
 
-  <div id="live" class="hidden">
-    <div class="podium-wrap"><div class="podium" id="podium"></div></div>
-    <div class="list-label" id="listLabel">Leaderboard</div>
-    <div id="board" class="board"></div>
+  <div id="content" class="hidden">
+    <div class="tabs">
+      <button class="tab active" id="tabBoard" data-view="board">🏆 Leaderboard</button>
+      <button class="tab" id="tabReview" data-view="review">📊 Question review</button>
+    </div>
+
+    <div id="viewBoard">
+      <div class="podium-wrap"><div class="podium" id="podium"></div></div>
+      <div class="list-label" id="listLabel">Leaderboard</div>
+      <div id="board" class="board"></div>
+    </div>
+
+    <div id="viewReview" class="hidden">
+      <div class="review" id="review"></div>
+    </div>
   </div>
 
   <!-- states -->
@@ -134,7 +170,7 @@
     <button id="retry">Retry now</button>
   </div>
 
-  <p class="foot">Ranked by correct answers, then fastest time. Refreshes automatically.</p>
+  <p class="foot" id="foot">Ranked by correct answers, then fastest time. Refreshes automatically.</p>
 </div>
 
 <script>
@@ -142,8 +178,24 @@
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbypkw5U2knawbPOf2YFyz7Zlsuy0uBg_YTd7Q4il2rrmrrXiZ2Z49jGe2De90I5nW4GVQ/exec";
 const REFRESH_MS = 5000;
 
-let lastGood = null;
+/* Keep in sync with quiz.html QUESTIONS: same order (Q1..Qn) + EXACT correct-answer text.
+   Only the correct string is needed here — option spreads are read from the sheet data. */
+const QMETA = [
+  { q:"Every Dory dish here is pescatarian, except one. Which one has something extra in it?", correct:"Thai-Canton Steamed Dory", why:"It\u2019s steamed with chicken stock concentrate, which is the giveaway. That bit of chicken makes it non-pescatarian, unlike the other Dory dishes that use a vegetarian stock." },
+  { q:"How much do we need to bring in per month, at current fixed cost, just to break even?", correct:"~$2.2M" },
+  { q:"Which of these chicken dishes secretly contains shellfish?", correct:"Ayam Kampung Masak Merah", why:"Its masak merah (sambal) base is built on belacan / dried shrimp, so it carries a shellfish allergen. The other chicken dishes don\u2019t." },
+  { q:"Space planning time. What are the dimensions of a GS table? (L × H × W, in cm)", correct:"L180 × H73 × W75" },
+  { q:"Which new dish is replacing Grilled Farm Fresh Chicken on the core buffet?", correct:"Smoked Paprika Lemon Chicken", why:"GFFC is replaced by Smoked Paprika Lemon Chicken on the buffet. Paprika Lemon Chicken Aglio Olio is the meal-box version, which is the trap." },
+  { q:"Which of these is a regular side, NOT a premium side?", correct:"Indonesian Spiced Potato Cake", why:"Indonesian Spiced Potato Cake sits under regular Sides. Satay, Takoyaki and Truffle Four-Cheese Mac are all Premium sides." },
+  { q:"What are the dimensions of a chafing dish with insert? (L × H × W, in cm)", correct:"L57 × H23 × W37" },
+  { q:"What did June sales close at?", correct:"~$1.96M" },
+  { q:"They all sound plant-based, but only one is actually vegan. Which?", correct:"Actually Plant-Based Chicken Gyoza", why:"Only the gyoza is tagged vegan. Plant-Based Beef Lasagna and Truffle Four-Cheese Mac contain dairy, so they\u2019re vegetarian, not vegan." },
+  { q:"Last one. One of our 5 principles is about learning. Which is the exact wording?", correct:"Be open, curious, and committed to learning" }
+];
+
+let lastRaw = null;   // last good raw rows
 let lastFetch = 0;
+let activeView = 'board';
 
 function $(id){return document.getElementById(id);}
 function fmtTime(sec){ sec=Math.max(0,Math.round(+sec||0)); const m=Math.floor(sec/60); return m+":"+String(sec%60).padStart(2,'0'); }
@@ -151,15 +203,22 @@ function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
 function num(v){ const n=parseFloat(v); return isNaN(n)?0:n; }
 
 function normalize(rows){
-  return rows.map(r=>({
-    name:String(r['Name']||'').trim(), score:num(r['Score']), total:num(r['Total'])||10, dur:num(r['Duration (s)'])
-  })).filter(r=>r.name);
+  return rows.map(r=>({ name:String(r['Name']||'').trim(), score:num(r['Score']), total:num(r['Total'])||10, dur:num(r['Duration (s)']) })).filter(r=>r.name);
 }
-function rank(list){
-  return list.slice().sort((a,b)=> (b.score-a.score) || (a.dur-b.dur) || a.name.localeCompare(b.name));
+function rank(list){ return list.slice().sort((a,b)=> (b.score-a.score) || (a.dur-b.dur) || a.name.localeCompare(b.name)); }
+function showState(which){ ['content','loading','empty','error'].forEach(id=>$(id).classList.toggle('hidden', id!==which)); }
+function setView(v){
+  activeView=v;
+  $('tabBoard').classList.toggle('active', v==='board');
+  $('tabReview').classList.toggle('active', v==='review');
+  $('viewBoard').classList.toggle('hidden', v!=='board');
+  $('viewReview').classList.toggle('hidden', v!=='review');
+  $('foot').textContent = v==='board'
+    ? 'Ranked by correct answers, then fastest time. Refreshes automatically.'
+    : 'Hardest questions first, by how many got them wrong. The correct answer is in green.';
 }
-function show(which){ ['live','loading','empty','error'].forEach(id=>$(id).classList.toggle('hidden', id!==which)); }
 
+/* ---------- leaderboard view ---------- */
 function podColumn(entry, place){
   return '<div class="pod p'+place+'">'
     + (place===1 ? '<div class="crown">👑</div>' : '<div class="crown"></div>')
@@ -169,15 +228,12 @@ function podColumn(entry, place){
     + '<div class="ped"><span class="pnum">'+place+'</span></div>'
     + '</div>';
 }
-
-function renderBoard(list){
-  const ranked = rank(list);
-  if(!ranked.length){ show('empty'); return; }
+function renderBoard(rawRows){
+  const ranked = rank(normalize(rawRows));
   const top = ranked.slice(0,3);
   const order = top.length===1 ? [[top[0],1]] : top.length===2 ? [[top[1],2],[top[0],1]] : [[top[1],2],[top[0],1],[top[2],3]];
   $('podium').innerHTML = order.map(function(o){ return podColumn(o[0],o[1]); }).join('');
-
-  var rest = ranked.slice(3);
+  const rest = ranked.slice(3);
   $('board').innerHTML = rest.map(function(r,i){
     return '<div class="row">'
       + '<span class="rnum">'+(i+4)+'</span>'
@@ -189,9 +245,60 @@ function renderBoard(list){
   $('board').style.display = hasRest ? '' : 'none';
   $('listLabel').style.display = hasRest ? '' : 'none';
   $('countChip').textContent = ranked.length + (ranked.length===1?' player':' players');
-  show('live');
 }
 
+/* ---------- most-missed view ---------- */
+function renderReview(rawRows){
+  var stats = QMETA.map(function(m, i){
+    var ansKey='Q'+(i+1)+' answer', corKey='Q'+(i+1)+' correct';
+    var answered = rawRows.filter(function(r){ return String(r[ansKey]||'').trim()!==''; });
+    var tally={};
+    answered.forEach(function(r){ var a=String(r[ansKey]).trim(); tally[a]=(tally[a]||0)+1; });
+    var correctCount = answered.filter(function(r){ return String(r[corKey])==='1'; }).length;
+    var n = answered.length;
+    return { q:m.q, correct:m.correct, why:m.why, n:n, correctCount:correctCount, wrongPct: n? (1-correctCount/n):-1, tally:tally };
+  });
+  // hardest first; questions nobody answered (n=0) sink to the bottom
+  stats.sort(function(a,b){ return (b.wrongPct-a.wrongPct) || (b.n-a.n); });
+
+  $('review').innerHTML = stats.map(function(s, idx){
+    var opts = Object.keys(s.tally);
+    if(opts.indexOf(s.correct)===-1) opts.push(s.correct);   // always show the correct answer
+    opts.sort(function(a,b){ return (s.tally[b]||0)-(s.tally[a]||0); });
+    var rightPct = s.n ? Math.round(s.correctCount/s.n*100) : 0;
+    var hardest = idx===0 && s.n>0 && s.wrongPct>0;
+    var bars = opts.map(function(o){
+      var cnt=s.tally[o]||0, pct = s.n? Math.round(cnt/s.n*100):0;
+      var isCorrect = o===s.correct;
+      return '<div class="obar'+(isCorrect?' correct':'')+'">'
+        + '<div class="ofill" style="width:'+pct+'%"></div>'
+        + '<span class="olabel">'+(isCorrect?'✓ ':'')+esc(o)+'</span>'
+        + '<span class="ocount">'+cnt+' · '+pct+'%</span>'
+        + '</div>';
+    }).join('');
+    return '<div class="qcard'+(hardest?' hardest':'')+'">'
+      + '<div class="qtop">'
+        + '<span class="qtag">'+(s.n? rightPct+'% got it right' : 'No answers yet')+'</span>'
+        + (hardest?'<span class="pill-hard">Trickiest</span>':'')
+      + '</div>'
+      + '<p class="qq">'+esc(s.q)+'</p>'
+      + bars
+      + '<p class="qn">Correct answer: <b>'+esc(s.correct)+'</b></p>'
+      + (s.why ? '<p class="qwhy"><b>Why:</b> '+esc(s.why)+'</p>' : '')
+      + '</div>';
+  }).join('');
+}
+
+/* ---------- data + state ---------- */
+function renderAll(rawRows){
+  var valid = rawRows.filter(function(r){ return String(r['Name']||'').trim(); });
+  if(!valid.length){ showState('empty'); return; }
+  lastRaw = valid;
+  renderBoard(valid);
+  renderReview(valid);
+  showState('content');
+  setView(activeView);
+}
 function setUpdated(ok){ $('dot').className = 'dot' + (ok?'':' stale'); }
 function tickAgo(){ if(!lastFetch) return; const s=Math.round((Date.now()-lastFetch)/1000);
   $('updText').textContent = s<2 ? 'just now' : ('updated '+s+'s ago'); }
@@ -199,22 +306,24 @@ function tickAgo(){ if(!lastFetch) return; const s=Math.round((Date.now()-lastFe
 async function load(){
   if(!WEBAPP_URL){
     $('errMsg').textContent = 'Set WEBAPP_URL to your Apps Script /exec URL to go live.';
-    show('error'); $('updText').textContent='not connected'; setUpdated(false); return;
+    showState('error'); $('updText').textContent='not connected'; setUpdated(false); return;
   }
   try{
     const res = await fetch(WEBAPP_URL, {cache:'no-store'});
     const data = await res.json();
     if(!data || !data.ok) throw new Error(data && data.error || 'bad response');
-    lastGood = normalize(data.rows||[]); lastFetch = Date.now();
-    setUpdated(true); tickAgo(); renderBoard(lastGood);
+    lastFetch = Date.now(); setUpdated(true); tickAgo();
+    renderAll(data.rows||[]);
   }catch(err){
     setUpdated(false);
-    if(lastGood){ tickAgo(); return; }
+    if(lastRaw){ tickAgo(); return; }
     $('errMsg').textContent = 'Trying again shortly… ('+String(err).slice(0,80)+')';
-    show('error');
+    showState('error');
   }
 }
 
+$('tabBoard').onclick = function(){ setView('board'); };
+$('tabReview').onclick = function(){ setView('review'); };
 $('retry').onclick = load;
 load();
 setInterval(load, REFRESH_MS);
