@@ -106,6 +106,15 @@
   .qn b{color:var(--ink)}
   .qwhy{margin:12px 0 0;font-size:13.5px;color:var(--ink);background:var(--accent-tint);border-radius:12px;padding:11px 13px;line-height:1.5}
   .qwhy b{font-weight:700}
+  .obar{cursor:pointer}
+  .obar:hover{border-color:var(--ink)}
+  .obar:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(254,204,7,.45)}
+  .obar .ochev{position:relative;z-index:1;color:var(--muted);font-size:12px;flex:none;margin-left:2px}
+  .names{display:none;flex-wrap:wrap;gap:6px;margin:-2px 0 10px;padding:0 2px}
+  .names.open{display:flex}
+  .who-chip{font-size:12.5px;font-weight:600;background:var(--accent-tint);color:var(--ink);border-radius:var(--r-pill);padding:5px 11px}
+  .names.correct .who-chip{background:rgba(63,125,84,.14);color:var(--ok)}
+  .who-none{font-size:12.5px;color:var(--muted);font-style:italic;padding:3px 2px}
 
   /* ---------- states ---------- */
   .state{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow);
@@ -195,6 +204,7 @@ const QMETA = [
 let lastRaw = null;   // last good raw rows
 let lastFetch = 0;
 let activeView = 'board';
+let openKeys = new Set();   // which answer bars are expanded (name lists), preserved across refreshes
 
 function $(id){return document.getElementById(id);}
 function fmtTime(sec){ sec=Math.max(0,Math.round(+sec||0)); const m=Math.floor(sec/60); return m+":"+String(sec%60).padStart(2,'0'); }
@@ -214,7 +224,7 @@ function setView(v){
   $('viewReview').classList.toggle('hidden', v!=='review');
   $('foot').textContent = v==='board'
     ? 'Ranked by correct answers, then fastest time. Refreshes automatically.'
-    : 'Hardest questions first, by how many got them wrong. The correct answer is in green.';
+    : 'Hardest first. Tap any answer to see who picked it. The correct answer is in green.';
 }
 
 /* ---------- leaderboard view ---------- */
@@ -251,11 +261,11 @@ function renderReview(rawRows){
   var stats = QMETA.map(function(m, i){
     var ansKey='Q'+(i+1)+' answer', corKey='Q'+(i+1)+' correct';
     var answered = rawRows.filter(function(r){ return String(r[ansKey]||'').trim()!==''; });
-    var tally={};
-    answered.forEach(function(r){ var a=String(r[ansKey]).trim(); tally[a]=(tally[a]||0)+1; });
+    var tally={}, pickers={};
+    answered.forEach(function(r){ var a=String(r[ansKey]).trim(); tally[a]=(tally[a]||0)+1; (pickers[a]=pickers[a]||[]).push(String(r['Name']||'').trim()); });
     var correctCount = answered.filter(function(r){ return String(r[corKey])==='1'; }).length;
     var n = answered.length;
-    return { q:m.q, correct:m.correct, why:m.why, n:n, correctCount:correctCount, wrongPct: n? (1-correctCount/n):-1, tally:tally };
+    return { qi:i, q:m.q, correct:m.correct, why:m.why, n:n, correctCount:correctCount, wrongPct: n? (1-correctCount/n):-1, tally:tally, pickers:pickers };
   });
   // hardest first; questions nobody answered (n=0) sink to the bottom
   stats.sort(function(a,b){ return (b.wrongPct-a.wrongPct) || (b.n-a.n); });
@@ -269,11 +279,19 @@ function renderReview(rawRows){
     var bars = opts.map(function(o){
       var cnt=s.tally[o]||0, pct = s.n? Math.round(cnt/s.n*100):0;
       var isCorrect = o===s.correct;
-      return '<div class="obar'+(isCorrect?' correct':'')+'">'
+      var names = s.pickers[o] || [];
+      var key = s.qi + '|' + o;
+      var open = openKeys.has(key);
+      var chips = names.length
+        ? names.map(function(nm){ return '<span class="who-chip">'+esc(nm)+'</span>'; }).join('')
+        : '<span class="who-none">No one picked this</span>';
+      return '<div class="obar'+(isCorrect?' correct':'')+'" role="button" tabindex="0" data-key="'+esc(key)+'">'
         + '<div class="ofill" style="width:'+pct+'%"></div>'
-        + '<span class="olabel">'+(isCorrect?'✓ ':'')+esc(o)+'</span>'
+        + '<span class="olabel">'+esc(o)+'</span>'
         + '<span class="ocount">'+cnt+' · '+pct+'%</span>'
-        + '</div>';
+        + '<span class="ochev">'+(open?'▾':'▸')+'</span>'
+        + '</div>'
+        + '<div class="names'+(isCorrect?' correct':'')+(open?' open':'')+'">'+chips+'</div>';
     }).join('');
     return '<div class="qcard'+(hardest?' hardest':'')+'">'
       + '<div class="qtop">'
@@ -321,6 +339,15 @@ async function load(){
   }
 }
 
+function toggleBar(bar){
+  var key=bar.getAttribute('data-key');
+  if(openKeys.has(key)) openKeys.delete(key); else openKeys.add(key);
+  var isOpen=openKeys.has(key);
+  var names=bar.nextElementSibling; if(names) names.classList.toggle('open', isOpen);
+  var chev=bar.querySelector('.ochev'); if(chev) chev.textContent = isOpen ? '▾' : '▸';
+}
+$('review').addEventListener('click', function(e){ var b=e.target.closest('.obar'); if(b) toggleBar(b); });
+$('review').addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ var b=e.target.closest('.obar'); if(b){ e.preventDefault(); toggleBar(b);} } });
 $('tabBoard').onclick = function(){ setView('board'); };
 $('tabReview').onclick = function(){ setView('review'); };
 $('retry').onclick = load;
